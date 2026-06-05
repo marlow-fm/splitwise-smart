@@ -46,9 +46,17 @@ export default function SmartInput({ onSuccess }: Props) {
         body: JSON.stringify({ rawInput: raw }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? 'Failed to parse. Try again.');
+        return;
+      }
+      if (!data.amount || data.amount === 0) {
+        setError('Could not detect an amount. Try: "Dinner $45 I paid, split with Alex"');
+        return;
+      }
       setParsed(data);
     } catch {
-      setError('Failed to parse. Try again.');
+      setError('Failed to parse. Check your connection.');
     } finally {
       setParsing(false);
     }
@@ -58,27 +66,37 @@ export default function SmartInput({ onSuccess }: Props) {
     setSubmitting(true);
     setError('');
     try {
-      // Resolve payer userId
+      // Resolve payer userId — handle "me"/"i" by using first user or matching by name
       let paidById: string | null = null;
       if (confirmed.payer) {
-        const match = users.find(
-          (u) => u.name.toLowerCase() === confirmed.payer?.toLowerCase()
-        );
-        paidById = match?.id ?? null;
+        const payerLower = confirmed.payer.toLowerCase();
+        if (payerLower === 'me' || payerLower === 'i') {
+          // "me" means the first user (or you can extend this with auth later)
+          paidById = users[0]?.id ?? null;
+        } else {
+          const match = users.find(
+            (u) => u.name.toLowerCase() === payerLower
+          );
+          paidById = match?.id ?? null;
+        }
       }
       if (!paidById && users.length > 0) paidById = users[0].id;
       if (!paidById) {
-        setError('Could not resolve payer. Please add users first.');
+        setError('Could not resolve payer. Please add users first via the Users page.');
         setSubmitting(false);
         return;
       }
 
       // Build splits
-      const participantUsers = confirmed.participants
+      const participantUsers = (confirmed.participants ?? [])
         .map((name: string) => users.find((u) => u.name.toLowerCase() === name.toLowerCase()))
         .filter(Boolean);
 
-      if (participantUsers.length === 0) participantUsers.push(users.find((u) => u.id === paidById));
+      // If no participants matched, include payer only
+      if (participantUsers.length === 0) {
+        const payer = users.find((u) => u.id === paidById);
+        if (payer) participantUsers.push(payer);
+      }
 
       const shareAmount = confirmed.amount / participantUsers.length;
       const splits = participantUsers.map((u: any) => ({ userId: u.id, shareAmount }));
@@ -100,7 +118,7 @@ export default function SmartInput({ onSuccess }: Props) {
 
       if (!res.ok) {
         const err = await res.json();
-        setError(err.error ?? 'Failed to save');
+        setError(err.error ?? 'Failed to save expense.');
         return;
       }
 
@@ -108,7 +126,7 @@ export default function SmartInput({ onSuccess }: Props) {
       setParsed(null);
       onSuccess();
     } catch {
-      setError('Something went wrong.');
+      setError('Something went wrong saving the expense.');
     } finally {
       setSubmitting(false);
     }
@@ -121,9 +139,9 @@ export default function SmartInput({ onSuccess }: Props) {
           className="smart-input flex-1"
           rows={2}
           value={raw}
-          onChange={(e) => { setRaw(e.target.value); setParsed(null); }}
+          onChange={(e) => { setRaw(e.target.value); setParsed(null); setError(''); }}
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleParse(); } }}
-          placeholder="Dinner 80 I paid, split with Alex and Jamie..."
+          placeholder="Dinner $80 I paid, split with Alex and Jamie..."
         />
         <button
           onClick={handleParse}
@@ -134,7 +152,12 @@ export default function SmartInput({ onSuccess }: Props) {
         </button>
       </div>
 
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && (
+        <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <span className="text-red-500 text-sm flex-1">{error}</span>
+          <button onClick={() => setError('')} className="text-red-400 hover:text-red-600 text-xs">✕</button>
+        </div>
+      )}
 
       {parsed && (
         <ParsePreview
