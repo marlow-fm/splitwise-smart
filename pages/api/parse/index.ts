@@ -8,14 +8,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { rawInput } = req.body;
   if (!rawInput) return res.status(400).json({ error: 'rawInput required' });
 
-  const users = await db.user.findMany();
-  const groups = await db.group.findMany();
+  try {
+    const users = await db.user.findMany();
+    const groups = await db.group.findMany();
 
-  const parsed = parseInput(
-    rawInput,
-    users.map((u) => u.name),
-    groups.map((g) => g.name)
-  );
+    const parsed = parseInput(
+      rawInput,
+      users.map((u) => u.name),
+      groups.map((g) => g.name)
+    );
 
-  return res.json(parsed);
+    return res.json(parsed);
+  } catch (err) {
+    console.error('[parse] error:', err);
+    return res.status(500).json({ error: 'Failed to parse input. Make sure the database is set up.' });
+  }
 }
