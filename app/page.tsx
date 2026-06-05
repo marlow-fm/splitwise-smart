@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import SmartInput from '@/components/SmartInput';
 import ExpenseList from '@/components/ExpenseList';
 import BalanceSummary from '@/components/BalanceSummary';
@@ -8,24 +8,30 @@ export default function DashboardPage() {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [balances, setBalances] = useState<{ net: any[]; debts: any[] }>({ net: [], debts: [] });
   const [loading, setLoading] = useState(true);
-  const refreshRef = useRef(0);
+  const [tick, setTick] = useState(0);
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setLoading(true);
-    const [expRes, balRes] = await Promise.all([
-      fetch('/api/expenses').then((r) => r.json()),
-      fetch('/api/balances').then((r) => r.json()),
-    ]);
-    setExpenses(expRes);
-    setBalances(balRes);
-    setLoading(false);
-  }
+    try {
+      const [expRes, balRes] = await Promise.all([
+        fetch('/api/expenses').then((r) => r.json()),
+        fetch('/api/balances').then((r) => r.json()),
+      ]);
+      setExpenses(Array.isArray(expRes) ? expRes : []);
+      setBalances(balRes?.net ? balRes : { net: [], debts: [] });
+    } catch (e) {
+      console.error('Failed to load data:', e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  useEffect(() => { loadData(); }, [refreshRef.current]);
+  useEffect(() => {
+    loadData();
+  }, [loadData, tick]);
 
   function onExpenseAdded() {
-    refreshRef.current++;
-    loadData();
+    setTick((t) => t + 1);
   }
 
   return (
@@ -34,7 +40,7 @@ export default function DashboardPage() {
       <section className="card">
         <h1 className="text-2xl font-bold text-slate-800 mb-1">Add an Expense</h1>
         <p className="text-slate-500 text-sm mb-4">
-          Just type naturally. E.g. &ldquo;Dinner 80 I paid, split with Alex and Jamie&rdquo;
+          Just type naturally — e.g. <em>&ldquo;Dinner $80 I paid, split with Alex and Jamie&rdquo;</em>
         </p>
         <SmartInput onSuccess={onExpenseAdded} />
       </section>
