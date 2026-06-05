@@ -11,7 +11,13 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest | undefined) {
+  console.log('[POST /api/users] req:', req ? 'Request object present' : 'UNDEFINED - THIS IS THE BUG');
+  
+  if (!req) {
+    return NextResponse.json({ error: 'Request object missing' }, { status: 500 });
+  }
+  
   const { name } = await req.json();
   if (!name || typeof name !== 'string' || !name.trim()) {
     return NextResponse.json({ error: 'Name is required' }, { status: 400 });
