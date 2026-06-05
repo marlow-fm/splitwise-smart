@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next';
+import { NextResponse } from 'next';
 import db from '@/lib/db';
 import { parseInput } from '@/lib/parsing/parseInput';
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   const body = await req.json();
   const { rawInput } = body;
   if (!rawInput) return NextResponse.json({ error: 'rawInput required' }, { status: 400 });

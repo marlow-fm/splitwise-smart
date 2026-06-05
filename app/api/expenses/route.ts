@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next';
+import { NextResponse } from 'next';
 import db from '@/lib/db';
 
-export async function GET(req: NextRequest) {
-  const groupId = req.nextUrl.searchParams.get('groupId');
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const groupId = url.searchParams.get('groupId');
   const expenses = await db.expense.findMany({
     where: groupId ? { groupId } : {},
     include: { paidBy: true, splits: { include: { user: true } }, group: true },
@@ -11,7 +12,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(expenses);
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   const body = await req.json();
   const { description, amount, currency, category, splitType, notes, date, groupId, paidById, splits } = body;
   if (!description || !amount || !paidById) {

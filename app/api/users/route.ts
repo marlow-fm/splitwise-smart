@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next';
+import { NextResponse } from 'next';
 import db from '@/lib/db';
 
 export async function GET() {
@@ -11,7 +11,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const { name } = await req.json();
     if (!name || typeof name !== 'string' || !name.trim()) {
@@ -28,8 +28,9 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextRequest) {
-  const id = req.nextUrl.searchParams.get('id');
+export async function DELETE(req: Request) {
+  const url = new URL(req.url);
+  const id = url.searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
   try {
     await db.user.delete({ where: { id } });
