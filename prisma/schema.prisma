@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  color        String        @default("#6366f1")
+  createdAt    DateTime      @default(now())
+  memberships  Membership[]
+  paidExpenses Expense[]     @relation("PaidBy")
+  splits       ExpenseSplit[]
+}
+
+model Group {
+  id          String       @id @default(cuid())
+  name        String
+  emoji       String       @default("👥")
+  createdAt   DateTime     @default(now())
+  memberships Membership[]
+  expenses    Expense[]
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  groupId   String
+  role      String   @default("member")
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+}
+
+model Expense {
+  id          String         @id @default(cuid())
+  description String
+  amount      Float
+  currency    String         @default("USD")
+  category    String         @default("general")
+  splitType   String         @default("equal")
+  notes       String?
+  date        DateTime       @default(now())
+  createdAt   DateTime       @default(now())
+  groupId     String?
+  paidById    String
+  group       Group?         @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  paidBy      User           @relation("PaidBy", fields: [paidById], references: [id])
+  splits      ExpenseSplit[]
+}
+
+model ExpenseSplit {
+  id          String   @id @default(cuid())
+  expenseId   String
+  userId      String
+  shareAmount Float
+  settled     Boolean  @default(false)
+  settledAt   DateTime?
+  expense     Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([expenseId, userId])
+}
