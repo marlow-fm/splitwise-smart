@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground: #0f172a;
+  --background: #f8fafc;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.smart-input {
+  @apply w-full p-4 text-lg rounded-2xl border-2 border-slate-200 bg-white shadow-sm
+         focus:outline-none focus:border-green-400 focus:ring-4 focus:ring-green-100
+         placeholder:text-slate-400 resize-none transition-all;
+}
+
+.category-chip {
+  @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+}
+
+.card {
+  @apply bg-white rounded-2xl border border-slate-100 shadow-sm p-4;
+}
