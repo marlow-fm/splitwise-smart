@@ -11,22 +11,18 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest | undefined) {
-  console.log('[POST /api/users] req:', req ? 'Request object present' : 'UNDEFINED - THIS IS THE BUG');
-  
-  if (!req) {
-    return NextResponse.json({ error: 'Request object missing' }, { status: 500 });
-  }
-  
-  const { name } = await req.json();
-  if (!name || typeof name !== 'string' || !name.trim()) {
-    return NextResponse.json({ error: 'Name is required' }, { status: 400 });
-  }
+export async function POST(req: NextRequest) {
   try {
+    const { name } = await req.json();
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
     const user = await db.user.create({ data: { name: name.trim() } });
     return NextResponse.json(user, { status: 201 });
   } catch (e: any) {
-    if (e?.code === 'P2002') return NextResponse.json({ error: 'User already exists' }, { status: 409 });
+    if (e?.code === 'P2002') {
+      return NextResponse.json({ error: 'User already exists' }, { status: 409 });
+    }
     console.error(e);
     return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
   }
