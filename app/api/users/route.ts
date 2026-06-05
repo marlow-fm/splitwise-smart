@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next';
-import { prisma } from '@/lib/prisma';
+import db from '@/lib/db';
 
 export async function GET() {
   try {
-    const users = await prisma.user.findMany({ orderBy: { name: 'asc' } });
+    const users = await db.user.findMany({ orderBy: { name: 'asc' } });
     return NextResponse.json(users);
   } catch (e) {
     console.error(e);
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Name is required' }, { status: 400 });
   }
   try {
-    const user = await prisma.user.create({ data: { name: name.trim() } });
+    const user = await db.user.create({ data: { name: name.trim() } });
     return NextResponse.json(user, { status: 201 });
   } catch (e: any) {
     if (e?.code === 'P2002') return NextResponse.json({ error: 'User already exists' }, { status: 409 });
@@ -30,7 +30,7 @@ export async function DELETE(req: NextRequest) {
   const id = req.nextUrl.searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
   try {
-    await prisma.user.delete({ where: { id } });
+    await db.user.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error(e);
