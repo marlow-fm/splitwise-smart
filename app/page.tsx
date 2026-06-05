@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import SmartInput from '@/components/SmartInput';
 import ExpenseList from '@/components/ExpenseList';
 import BalanceSummary from '@/components/BalanceSummary';
+import UserManager from '@/components/UserManager';
 
 export default function DashboardPage() {
   const [expenses, setExpenses] = useState<any[]>([]);
@@ -40,7 +41,7 @@ export default function DashboardPage() {
       <section className="card">
         <h1 className="text-2xl font-bold text-slate-800 mb-1">Add an Expense</h1>
         <p className="text-slate-500 text-sm mb-4">
-          Just type naturally — e.g. <em>&ldquo;Dinner $80 I paid, split with Alex and Jamie&rdquo;</em>
+          Just type naturally &mdash; e.g. <em>&ldquo;Dinner $80 I paid, split with Alex and Jamie&rdquo;</em>
         </p>
         <SmartInput onSuccess={onExpenseAdded} />
       </section>
@@ -57,6 +58,11 @@ export default function DashboardPage() {
           <ExpenseList expenses={expenses} loading={loading} onRefresh={loadData} />
         </section>
       </div>
+
+      {/* People manager */}
+      <section>
+        <UserManager />
+      </section>
     </div>
   );
 }
