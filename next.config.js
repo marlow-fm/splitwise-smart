@@ -1,3 +1,10 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  experimental: {
+    turbo: {
+      enabled: false,
+    },
+  },
+};
+
 module.exports = nextConfig;
