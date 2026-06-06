@@ -4,7 +4,10 @@ import { pickColor } from '@/lib/users';
 
 export async function GET() {
   try {
-    const users = await db.user.findMany({ orderBy: { name: 'asc' } });
+    const users = await db.user.findMany({
+      orderBy: { name: 'asc' },
+    });
+
     return NextResponse.json(users);
   } catch (e) {
     console.error('GET /api/users', e);
