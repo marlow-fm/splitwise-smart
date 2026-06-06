@@ -8,62 +8,72 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  name         String
-  color        String        @default("#6366f1")
-  createdAt    DateTime      @default(now())
-  memberships  Membership[]
-  paidExpenses Expense[]     @relation("PaidBy")
-  splits       ExpenseSplit[]
-}
-
-model Group {
-  id          String       @id @default(cuid())
-  name        String
-  emoji       String       @default("👥")
-  createdAt   DateTime     @default(now())
-  memberships Membership[]
-  expenses    Expense[]
-}
-
-model Membership {
-  id        String   @id @default(cuid())
-  userId    String
-  groupId   String
-  role      String   @default("member")
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, groupId])
+  id              String            @id @default(cuid())
+  name            String            @unique
+  color           String            @default("#6366f1")
+  createdAt       DateTime          @default(now())
+  paidExpenses    Expense[]         @relation("PaidBy")
+  splits          ExpenseSplit[]
+  recurringPaid   RecurringExpense[] @relation("RecurringPaidBy")
+  recurringSplits RecurringSplit[]
+  settlementsFrom Settlement[]      @relation("SettlementsFrom")
+  settlementsTo   Settlement[]      @relation("SettlementsTo")
 }
 
 model Expense {
-  id          String         @id @default(cuid())
+  id          String            @id @default(cuid())
   description String
-  amount      Float
-  currency    String         @default("USD")
-  category    String         @default("general")
-  splitType   String         @default("equal")
-  notes       String?
-  date        DateTime       @default(now())
-  createdAt   DateTime       @default(now())
-  groupId     String?
+  amountCents Int
+  category    String            @default("general")
+  date        DateTime          @default(now())
+  createdAt   DateTime          @default(now())
   paidById    String
-  group       Group?         @relation(fields: [groupId], references: [id], onDelete: SetNull)
-  paidBy      User           @relation("PaidBy", fields: [paidById], references: [id])
+  recurringId String?
+  paidBy      User              @relation("PaidBy", fields: [paidById], references: [id])
+  recurring   RecurringExpense? @relation(fields: [recurringId], references: [id], onDelete: SetNull)
   splits      ExpenseSplit[]
 }
 
 model ExpenseSplit {
-  id          String   @id @default(cuid())
-  expenseId   String
-  userId      String
-  shareAmount Float
-  settled     Boolean  @default(false)
-  settledAt   DateTime?
-  expense     Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String  @id @default(cuid())
+  expenseId  String
+  userId     String
+  shareCents Int
+  expense    Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([expenseId, userId])
+}
+
+model RecurringExpense {
+  id          String           @id @default(cuid())
+  description String
+  amountCents Int
+  category    String           @default("general")
+  paidById    String
+  createdAt   DateTime         @default(now())
+  paidBy      User             @relation("RecurringPaidBy", fields: [paidById], references: [id])
+  splits      RecurringSplit[]
+  expenses    Expense[]
+}
+
+model RecurringSplit {
+  id          String           @id @default(cuid())
+  recurringId String
+  userId      String
+  recurring   RecurringExpense @relation(fields: [recurringId], references: [id], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([recurringId, userId])
+}
+
+model Settlement {
+  id          String   @id @default(cuid())
+  fromUserId  String
+  toUserId    String
+  amountCents Int
+  note        String?
+  createdAt   DateTime @default(now())
+  fromUser    User     @relation("SettlementsFrom", fields: [fromUserId], references: [id])
+  toUser      User     @relation("SettlementsTo", fields: [toUserId], references: [id])
 }

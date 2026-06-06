@@ -2,27 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground: #0f172a;
-  --background: #f8fafc;
-}
-
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: #0f172a;
+  background: #f8fafc;
   font-family: system-ui, -apple-system, sans-serif;
-}
-
-.smart-input {
-  @apply w-full p-4 text-lg rounded-2xl border-2 border-slate-200 bg-white shadow-sm
-         focus:outline-none focus:border-green-400 focus:ring-4 focus:ring-green-100
-         placeholder:text-slate-400 resize-none transition-all;
-}
-
-.category-chip {
-  @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
 }
 
 .card {
   @apply bg-white rounded-2xl border border-slate-100 shadow-sm p-4;
+}
+
+.smart-input {
+  @apply w-full p-4 text-base rounded-2xl border-2 border-slate-200 bg-white shadow-sm
+         focus:outline-none focus:border-green-400 focus:ring-4 focus:ring-green-100
+         placeholder:text-slate-400 resize-none transition-all;
+}
+
+.input {
+  @apply w-full border border-slate-200 rounded-lg px-3 py-2 bg-white
+         focus:outline-none focus:ring-2 focus:ring-green-300;
+}
+
+.btn-primary {
+  @apply rounded-xl bg-green-600 text-white font-medium hover:bg-green-700
+         disabled:opacity-40 transition-colors;
+}
+
+.btn-secondary {
+  @apply rounded-xl border border-slate-200 text-slate-600 font-medium hover:bg-slate-50
+         disabled:opacity-40 transition-colors;
 }
