@@ -3,7 +3,9 @@ import db from '@/lib/db';
 import { dollarsToCents } from '@/lib/money';
 import { monthRange } from '@/lib/dates';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(_req: NextRequest) {
   try {
     const recurring = await db.recurringExpense.findMany({
       include: {

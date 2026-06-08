@@ -1,9 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import { computeBalances } from '@/lib/balances';
 import { monthRange } from '@/lib/dates';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(_req: NextRequest) {
   try {
     const [expenses, settlements] = await Promise.all([
       db.expense.findMany({

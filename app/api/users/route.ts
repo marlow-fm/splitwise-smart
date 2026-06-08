@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import { pickColor } from '@/lib/users';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(_req: NextRequest) {
   try {
     const users = await db.user.findMany({
       orderBy: { name: 'asc' },

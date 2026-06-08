@@ -3,6 +3,8 @@ import db from '@/lib/db';
 import { splitEqual } from '@/lib/money';
 import { monthRange } from '@/lib/dates';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const { recurringId } = await req.json();
