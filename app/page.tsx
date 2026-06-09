@@ -6,6 +6,7 @@ import TabNav from '@/components/TabNav';
 import ExpenseForm from '@/components/ExpenseForm';
 import RecurringPanel from '@/components/RecurringPanel';
 import BalancesView from '@/components/BalancesView';
+import AnalyticsView from '@/components/AnalyticsView';
 import HistoryView from '@/components/HistoryView';
 import PeoplePanel from '@/components/PeoplePanel';
 
@@ -24,6 +25,8 @@ export default function HomePage() {
       )}
 
       {tab === 'balances' && <BalancesView />}
+
+      {tab === 'analytics' && <AnalyticsView />}
 
       {tab === 'history' && (
         <section>

@@ -79,4 +79,4 @@ export type RecurringExpense = {
   appliedThisMonth: boolean;
 };
 
-export type Tab = 'add' | 'balances' | 'history' | 'people';
+export type Tab = 'add' | 'balances' | 'analytics' | 'history' | 'people';
